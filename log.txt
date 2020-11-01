@@ -1,0 +1,23 @@
+-----------------
+char --> d
+state --> 0
+next state --> 1
+-----------------
+char --> a
+state --> 1
+next state --> 2
+-----------------
+char --> 4f
+state --> 2
+next state --> 3
+-----------------
+char --> 4b
+state --> 3
+next state --> 4
+-----------------
+char --> d
+state --> 4
+next state --> 5
+-----------------
+char --> a
+state --> 5
