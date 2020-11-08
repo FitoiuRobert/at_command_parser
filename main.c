@@ -8,6 +8,8 @@
 int main(int argc, char *argv[]) {
     uint8_t c;
     FILE *fp=NULL;
+    STATE_MACHINE_RETURN_VALUE_t ret = STATE_MACHINE_NOT_READY;
+    AT_COMMAND_t current_at_command;
 
     if(argc != 2) {
         fprintf(stderr, "error: Incorrect number of parameters, expected 1, got %d\n", argc-1);
@@ -22,8 +24,18 @@ int main(int argc, char *argv[]) {
     }
 
     while (fread(&c, sizeof(uint8_t), 1, fp) > 0) {
-        if((DATA_MATRIX.ok = at_command_parse(c)) == STATE_MACHINE_READY_WITH_ERROR)
+        if((ret = at_command_parse(c)) == STATE_MACHINE_READY_WITH_ERROR)
             break;
+        if(ret == STATE_MACHINE_READY_OK) {
+            current_at_command = get_current_at_command();
+            if ( handle_at_command(current_at_command) != 0 ) {
+                fprintf(stderr, "error: Failed while handling command %u!!!\n", current_at_command);
+                break;
+            }
+            print_at_command_data();
+            rest_at_command_data();
+            *STATE_ADDRESS = 0;
+        }
     }
 
     if (fclose(fp) != 0) {
@@ -31,11 +43,11 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    if(DATA_MATRIX.ok == STATE_MACHINE_READY_OK) {
-        print_at_command_data();
+    if(ret == STATE_MACHINE_READY_OK) {
+        // print_at_command_data();
         exit(EXIT_SUCCESS);
     } else {
-        fprintf(stderr, "%lu\n", *STATE_ADDRESS);
+        fprintf(stderr, "%u\n", *STATE_ADDRESS);
     }
 
     exit(EXIT_FAILURE);

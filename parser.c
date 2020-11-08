@@ -1,11 +1,12 @@
 #include <stdio.h>
+#include <string.h>
 #include "parser.h"
 
 void say_hello() {
     // printf("Hello\n");
 }
 
-STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
+STATE_MACHINE_RETURN_VALUE_t at_command_parse(uint8_t current_character){
     static uint8_t state = 0;
     STATE_ADDRESS = &state;
 
@@ -65,6 +66,7 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
         case 5:
             // printf("state --> %u\n", state);
             if(current_character == 0x0a){
+                DATA_MATRIX.ok = 1;
                 return STATE_MACHINE_READY_OK;
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
@@ -118,6 +120,7 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
         case 11:
             // printf("state --> %u\n", state);
             if(current_character == 0x0a){
+                DATA_MATRIX.ok = 0;
                 return STATE_MACHINE_READY_OK;
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
@@ -196,6 +199,34 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
 
     return STATE_MACHINE_NOT_READY;
 }
+
+
+AT_COMMAND_t get_current_at_command() {
+    if (DATA_MATRIX.ok == 0)
+        return AT_C_ERROR;
+    // https://en.cppreference.com/w/c/language/string_literal
+    // if(memcmp(DATA_MATRIX.data[0],u8"+COPN:",6) == 0)
+    if(memcmp(DATA_MATRIX.data[0],"+COPN:",6) == 0)
+        return AT_C_COPN;
+    if(memcmp(DATA_MATRIX.data[0],"+CSQ:",5) == 0)
+        return AT_C_CSQ;
+
+    return AT_C_UNKNOWN;
+};
+
+
+uint8_t handle_at_command(AT_COMMAND_t at_command) {
+    return 0;
+}
+
+
+void rest_at_command_data() {
+    DATA_MATRIX.ok = 0;
+    memset(DATA_MATRIX.data, 0, sizeof(DATA_MATRIX.data));
+    DATA_MATRIX.line_count = 0;
+    DATA_MATRIX.col_count = 0;
+}
+
 
 // TODO handle line overflow
 void write_at_command_data(uint8_t current_character, uint8_t increase_line_count) {
