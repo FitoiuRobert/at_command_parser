@@ -6,6 +6,7 @@
     #define AT_COMMAND_MAX_LINES 100
     #define AT_COMMAND_MAX_LINE_SIZE 128
 
+    size_t *STATE_ADDRESS;
     typedef struct {
         uint8_t ok;
         uint8_t data[AT_COMMAND_MAX_LINES][AT_COMMAND_MAX_LINE_SIZE + 1];

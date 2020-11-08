@@ -7,13 +7,14 @@ void say_hello() {
 
 STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
     static uint8_t state = 0;
+    STATE_ADDRESS = &state;
+
     switch (state) {
         case 0:
             // printf("state --> %u\n", state);
             if(current_character == 0x0d){
                 state = 1;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -23,7 +24,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 0x0a){
                 state = 2;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,1);
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -33,11 +33,9 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 'O'){
                 state = 3;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else if(current_character == 'E'){
                 state = 6;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else if(current_character == '+'){
                 state = 12;
                 // printf("next state --> %u\n", state);
@@ -51,7 +49,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 'K'){
                 state = 4;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -61,7 +58,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 0x0d){
                 state = 5;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -69,7 +65,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
         case 5:
             // printf("state --> %u\n", state);
             if(current_character == 0x0a){
-                write_at_command_data(current_character,1);
                 return STATE_MACHINE_READY_OK;
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
@@ -80,7 +75,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 'R'){
                 state = 7;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -90,7 +84,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 'R'){
                 state = 8;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -100,7 +93,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 'O'){
                 state = 9;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -110,7 +102,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 'R'){
                 state = 10;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -120,7 +111,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 0x0d){
                 state = 11;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -128,7 +118,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
         case 11:
             // printf("state --> %u\n", state);
             if(current_character == 0x0a){
-                write_at_command_data(current_character,1);
                 return STATE_MACHINE_READY_OK;
             } else {
                 return STATE_MACHINE_READY_WITH_ERROR;
@@ -173,7 +162,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 0x0d){
                 state = 16;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else if (current_character == '+') {
                 state = 12;
                 // printf("next state --> %u\n", state);
@@ -187,7 +175,6 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 0x0a){
                 state = 17;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,1);
             }else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -197,11 +184,9 @@ STATE_MACHINE_RETURN_VALUE at_command_parse(uint8_t current_character){
             if(current_character == 'O'){
                 state = 3;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             } else if (current_character == 'E') {
                 state = 6;
                 // printf("next state --> %u\n", state);
-                write_at_command_data(current_character,0);
             }else {
                 return STATE_MACHINE_READY_WITH_ERROR;
             }
@@ -239,7 +224,7 @@ void print_at_command_data() {
 
     for(line_iter=0; line_iter < DATA_MATRIX.line_count; ++line_iter) {
         col_iter=0;
-        fprintf(stdout,"[%u]:",line_iter);
+        // fprintf(stdout,"[%u]:",line_iter);
         while (DATA_MATRIX.data[line_iter][col_iter] != '\0'){
             fprintf(stdout,"%c", DATA_MATRIX.data[line_iter][col_iter]);
             ++col_iter;

@@ -8,8 +8,6 @@
 int main(int argc, char *argv[]) {
     uint8_t c;
     FILE *fp=NULL;
-    STATE_MACHINE_RETURN_VALUE ret;
-
 
     if(argc != 2) {
         fprintf(stderr, "error: Incorrect number of parameters, expected 1, got %d\n", argc-1);
@@ -24,20 +22,8 @@ int main(int argc, char *argv[]) {
     }
 
     while (fread(&c, sizeof(uint8_t), 1, fp) > 0) {
-        if((ret = at_command_parse(c)) == STATE_MACHINE_READY_WITH_ERROR)
-            break;\
-        // not "AT_COMMAND_MAX_LINES -1" because line_count is increased at the end
-        // e.g. when DATA_MATRIX.line_count is 99 it writes on the 99'th line
-        // and then when it reaches to end will set line_count to 100
-        if(DATA_MATRIX.line_count == AT_COMMAND_MAX_LINES) {
-            print_at_command_data();
-            DATA_MATRIX.line_count=0;
-            DATA_MATRIX.col_count=0;
-        }
-    }
-
-    if(DATA_MATRIX.line_count < AT_COMMAND_MAX_LINES-1) {
-        print_at_command_data();
+        if((DATA_MATRIX.ok = at_command_parse(c)) == STATE_MACHINE_READY_WITH_ERROR)
+            break;
     }
 
     if (fclose(fp) != 0) {
@@ -45,8 +31,11 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    if(ret == STATE_MACHINE_READY_OK) {
+    if(DATA_MATRIX.ok == STATE_MACHINE_READY_OK) {
+        print_at_command_data();
         exit(EXIT_SUCCESS);
+    } else {
+        fprintf(stderr, "%lu\n", *STATE_ADDRESS);
     }
 
     exit(EXIT_FAILURE);
